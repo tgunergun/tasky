@@ -8,11 +8,12 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/jeffthorne/tasky/auth"
+	"github.com/jeffthorne/tasky/database"
 	"github.com/jeffthorne/tasky/models"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-func GetTodo(c *gin.Context) {
+func GetTodo(c *gin.Context, db database.DBClient) {
 	var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
 
 	id := c.Param("id")
@@ -25,7 +26,7 @@ func GetTodo(c *gin.Context) {
 	c.JSON(http.StatusOK, todo)
 }
 
-func ClearAll(c *gin.Context) {
+func ClearAll(c *gin.Context, db database.DBClient) {
 	session := auth.ValidateSession(c)
 	if !session {
 		return
@@ -43,7 +44,7 @@ func ClearAll(c *gin.Context) {
 
 }
 
-func GetTodos(c *gin.Context) {
+func GetTodos(c *gin.Context, db database.DBClient) {
 	session := auth.ValidateSession(c)
 	if !session {
 		return
@@ -58,7 +59,7 @@ func GetTodos(c *gin.Context) {
 	c.JSON(http.StatusOK, todos)
 }
 
-func DeleteTodo(c *gin.Context) {
+func DeleteTodo(c *gin.Context, db database.DBClient) {
 	session := auth.ValidateSession(c)
 	if !session {
 		return
@@ -74,7 +75,7 @@ func DeleteTodo(c *gin.Context) {
 
 }
 
-func UpdateTodo(c *gin.Context) {
+func UpdateTodo(c *gin.Context, db database.DBClient) {
 	session := auth.ValidateSession(c)
 	if !session {
 		return
@@ -95,7 +96,7 @@ func UpdateTodo(c *gin.Context) {
 	c.JSON(http.StatusOK, newTodo)
 }
 
-func AddTodo(c *gin.Context) {
+func AddTodo(c *gin.Context, db database.DBClient) {
 	session := auth.ValidateSession(c)
 	if !session {
 		return
@@ -112,7 +113,7 @@ func AddTodo(c *gin.Context) {
 	todo.ID = primitive.NewObjectID()
 	todo.UserID = c.Param("userid")
 
-	todo, err := db.AddTodo(ctx, c.Param("userid"))
+	err := db.AddTodo(ctx, &todo)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

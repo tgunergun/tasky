@@ -10,13 +10,14 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/jeffthorne/tasky/auth"
+	"github.com/jeffthorne/tasky/database"
 	"github.com/jeffthorne/tasky/models"
 	"golang.org/x/crypto/bcrypt"
 )
 
 var SECRET_KEY string = os.Getenv("SECRET_KEY")
 
-func SignUp(c *gin.Context) {
+func SignUp(c *gin.Context, db database.DBClient) {
 	var user models.User
 	if err := c.BindJSON(&user); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -70,7 +71,7 @@ func SignUp(c *gin.Context) {
 	c.JSON(http.StatusOK, msg)
 
 }
-func Login(c *gin.Context) {
+func Login(c *gin.Context, db database.DBClient) {
 	var user models.User
 
 	if err := c.BindJSON(&user); err != nil {
@@ -146,7 +147,7 @@ func Login(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"msg": "login successful"})
 }
 
-func Todo(c *gin.Context) {
+func Todo(c *gin.Context, db database.DBClient) {
 	session := auth.ValidateSession(c)
 	if session {
 		c.HTML(http.StatusOK, "todo.html", nil)

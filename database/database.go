@@ -19,7 +19,8 @@ type DBClient interface {
 	ClearTodos(ctx context.Context, userid string) error
 	DeleteTodo(ctx context.Context, id string, userid string) (string, error)
 	UpdateTodo(ctx context.Context, newTodo *models.Todo) error
-	AddTodo(ctx context.Context, userid string) (models.Todo, error)
+	AddTodo(ctx context.Context, todo *models.Todo) error
+	Close() error
 }
 
 func CreateDBClientFromEnv() DBClient {
@@ -31,6 +32,8 @@ func CreateDBClientFromEnv() DBClient {
 	switch dbType {
 	case "mongodb":
 		return NewMongoDBClient()
+	case "postgresql":
+		return NewPostgresDBClient()
 	default:
 		panic(fmt.Sprintf("This database type is unsupported: %s", dbType))
 	}

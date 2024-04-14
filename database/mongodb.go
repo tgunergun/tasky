@@ -102,26 +102,28 @@ func (m *MongoDBClient) UpdateTodo(ctx context.Context, newTodo *models.Todo) er
 	return nil
 }
 
-func (m *MongoDBClient) AddTodo(ctx context.Context, userid string) (todo models.Todo, err error) {
+func (m *MongoDBClient) AddTodo(ctx context.Context, todo *models.Todo) (err error) {
 	todo.ID = primitive.NewObjectID()
 	_, err = m.todoCollection.InsertOne(ctx, todo)
 	if err != nil {
-		return todo, err
+		return err
 	}
-	return todo, nil
+	return nil
+}
+
+func (m *MongoDBClient) Close() error {
+	return nil
 }
 
 func NewMongoDBClient() *MongoDBClient {
 	m := MongoDBClient{}
-	m.client = CreateMongoClient()
-	m.todoCollection = OpenCollection(m.client, "todos")
-	m.userCollection = OpenCollection(m.client, "users")
+	m.client = createMongoClient()
+	m.todoCollection = openCollection(m.client, "todos")
+	m.userCollection = openCollection(m.client, "users")
 	return &m
 }
 
-var Client *mongo.Client = CreateMongoClient()
-
-func CreateMongoClient() *mongo.Client {
+func createMongoClient() *mongo.Client {
 	godotenv.Overload()
 	MongoDbURI := os.Getenv("MONGODB_URI")
 	client, err := mongo.NewClient(options.Client().ApplyURI(MongoDbURI))
@@ -141,7 +143,7 @@ func CreateMongoClient() *mongo.Client {
 	return client
 }
 
-func OpenCollection(client *mongo.Client, collectionName string) *mongo.Collection {
+func openCollection(client *mongo.Client, collectionName string) *mongo.Collection {
 	MongoDbDatabaseName := os.Getenv("MONGODB_DB")
 	if len(MongoDbDatabaseName) == 0 {
 		MongoDbDatabaseName = "go-mongodb"
