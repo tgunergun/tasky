@@ -1,0 +1,56 @@
+volumes:
+  mongodb-data: {}
+  postgres-data: {}
+services:
+  app-mongodb:
+    depends_on:
+      - mongodb
+    build:
+      context: .
+    ports:
+      - 8080:8080
+    environment:
+      MONGODB_URI: mongodb://user:supersecret@mongodb:27017/app-db
+      SECRET_KEY: supersecret
+      MONGODB_DB: app-db
+  app-postgres:
+    depends_on:
+      - postgres
+    build:
+      context: .
+    ports:
+      - 8080:8080
+    environment:
+      POSTGRES_URI: postgresql://user:supersecret@postgres:5432
+      SECRET_KEY: supersecret
+      MONGODB_DB: app-db
+  mongodb:
+    build:
+      dockerfile: mongo.Dockerfile
+      context: .
+    environment:
+      MONGODB_USER: user
+      MONGODB_PASS: supersecret
+      MONGODB_DB: app-db
+    volumes:
+      - mongodb-data:/data/db
+    healthcheck:
+      test: [ "CMD", "nc", "-z", "localhost", "27017" ]
+      interval: 5s
+      timeout: 20s
+      retries: 10
+      start_period: 3s
+  postgres:
+    image: postgres:16.2-alpine
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: supersecret
+      POSTGRES_DB: app-db
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD", "pg_isready" ]
+      interval: 5s
+      timeout: 20s
+      retries: 10
+      start_period: 3s
