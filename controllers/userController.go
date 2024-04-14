@@ -8,30 +8,24 @@ import (
 	"os"
 	"time"
 
-	"github.com/jeffthorne/tasky/auth"
-	"github.com/jeffthorne/tasky/database"
-	"github.com/jeffthorne/tasky/models"
 	"github.com/gin-gonic/gin"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
+	"github.com/jeffthorne/tasky/auth"
+	"github.com/jeffthorne/tasky/models"
 	"golang.org/x/crypto/bcrypt"
 )
 
 var SECRET_KEY string = os.Getenv("SECRET_KEY")
-var userCollection *mongo.Collection = database.OpenCollection(database.Client, "user")
 
-
-func SignUp(c * gin.Context){
-	
+func SignUp(c *gin.Context) {
 	var user models.User
 	if err := c.BindJSON(&user); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 	var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+	defer cancel()
 
-	emailCount, err := userCollection.CountDocuments(ctx, bson.M{"email": user.Email})
+	emailCount, err := db.FindExistingUsers(ctx, user)
 	defer cancel()
 
 	if err != nil {
@@ -46,14 +40,7 @@ func SignUp(c * gin.Context){
 		c.JSON(http.StatusBadRequest, gin.H{"error": "User with this email already exists!"})
 		return
 	}
-	user.ID = primitive.NewObjectID()
-	resultInsertionNumber, insertErr := userCollection.InsertOne(ctx, user)
-	if insertErr != nil {
-		msg := fmt.Sprintf("user item was not created")
-		c.JSON(http.StatusInternalServerError, gin.H{"error": msg})
-		return
-	}
-	defer cancel()
+	msg, err := db.AddUser(ctx, &user)
 	userId := user.ID.Hex()
 	username := *user.Name
 
@@ -70,33 +57,30 @@ func SignUp(c * gin.Context){
 	})
 
 	http.SetCookie(c.Writer, &http.Cookie{
-		Name : "userID",
-		Value : userId,
+		Name:    "userID",
+		Value:   userId,
 		Expires: expirationTime,
 	})
 	http.SetCookie(c.Writer, &http.Cookie{
-		Name : "username",
-		Value : username,
+		Name:    "username",
+		Value:   username,
 		Expires: expirationTime,
 	})
 
-	c.JSON(http.StatusOK, resultInsertionNumber)
-
+	c.JSON(http.StatusOK, msg)
 
 }
-func Login(c * gin.Context){
+func Login(c *gin.Context) {
 	var user models.User
-	var foundUser models.User
-	
+
 	if err := c.BindJSON(&user); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "bind error"})
 		return
 	}
 	var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
-
-	err := userCollection.FindOne(ctx, bson.M{"email": user.Email}).Decode(&foundUser)
 	defer cancel()
 
+	foundUser, err := db.GetUser(ctx, *user.Email)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": " email or password is incorrect"})
 		return
@@ -116,14 +100,14 @@ func Login(c * gin.Context){
 	}
 	userId := foundUser.ID.Hex()
 	username := *foundUser.Name
-	
+
 	shouldRefresh, err, expirationTime := auth.RefreshToken(c)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "refresh token error"})
 		return
 	}
 
-	if shouldRefresh{
+	if shouldRefresh {
 		token, err, expirationTime := auth.GenerateJWT(userId)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "error occured while generating token"})
@@ -137,35 +121,35 @@ func Login(c * gin.Context){
 		})
 
 		http.SetCookie(c.Writer, &http.Cookie{
-			Name : "userID",
-			Value : userId,
+			Name:    "userID",
+			Value:   userId,
 			Expires: expirationTime,
 		})
 		http.SetCookie(c.Writer, &http.Cookie{
-			Name : "username",
-			Value : username,
+			Name:    "username",
+			Value:   username,
 			Expires: expirationTime,
 		})
-		
+
 	} else {
 		http.SetCookie(c.Writer, &http.Cookie{
-			Name : "userID",
-			Value : userId,
+			Name:    "userID",
+			Value:   userId,
 			Expires: expirationTime,
 		})
 		http.SetCookie(c.Writer, &http.Cookie{
-			Name : "username",
-			Value : username,
+			Name:    "username",
+			Value:   username,
 			Expires: expirationTime,
 		})
 	}
 	c.JSON(http.StatusOK, gin.H{"msg": "login successful"})
 }
 
-func Todo(c * gin.Context) {
+func Todo(c *gin.Context) {
 	session := auth.ValidateSession(c)
 	if session {
-		c.HTML(http.StatusOK,"todo.html", nil)
+		c.HTML(http.StatusOK, "todo.html", nil)
 	}
 }
 
