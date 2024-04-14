@@ -3,35 +3,38 @@ package database
 import (
 	"context"
 	"fmt"
-	"log"
 	"os"
-	"time"
+	"strings"
 
+	"github.com/jeffthorne/tasky/models"
 	"github.com/joho/godotenv"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-var Client *mongo.Client = CreateMongoClient()
-
-func CreateMongoClient() *mongo.Client {
-	godotenv.Overload()
-	MongoDbURI := os.Getenv("MONGODB_URI")
-	client, err := mongo.NewClient(options.Client().ApplyURI(MongoDbURI))
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	var ctx, cancel = context.WithTimeout(context.Background(), 10*time.Second)
-	err = client.Connect(ctx)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer cancel()
-	fmt.Println("Connected to MONGO -> ", MongoDbURI)
-	return client
+type DBClient interface {
+	FindExistingUsers(ctx context.Context, user models.User) (int64, error)
+	AddUser(ctx context.Context, user *models.User) ([]byte, error)
+	GetUser(ctx context.Context, email string) (models.User, error)
+	GetTodo(ctx context.Context, id string) (models.Todo, error)
+	GetTodos(ctx context.Context, id string) ([]models.Todo, error)
+	ClearTodos(ctx context.Context, userid string) error
+	DeleteTodo(ctx context.Context, id string, userid string) (string, error)
+	UpdateTodo(ctx context.Context, newTodo *models.Todo) error
+	AddTodo(ctx context.Context, todo *models.Todo) error
+	Close() error
 }
 
-func OpenCollection(client *mongo.Client, collectionName string) *mongo.Collection {
-	return client.Database("go-mongodb").Collection(collectionName)
+func CreateDBClientFromEnv() DBClient {
+	godotenv.Overload()
+	dbType := strings.ToLower(os.Getenv("DB_TYPE"))
+	if len(dbType) == 0 {
+		dbType = "mongodb"
+	}
+	switch dbType {
+	case "mongodb":
+		return NewMongoDBClient()
+	case "postgresql":
+		return NewPostgresDBClient()
+	default:
+		panic(fmt.Sprintf("This database type is unsupported: %s", dbType))
+	}
 }

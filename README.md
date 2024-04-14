@@ -6,7 +6,9 @@ The following environment variables are needed.
 |Variable|Purpose|example|
 |---|---|---|
 |`MONGODB_URI`|Address to mongo server|`mongodb://servername:27017` or `mongodb://username:password@hostname:port` or `mongodb+srv://` schema|
+|`POSTGRES_URI`|Address to postgres server (`DB_TYPE` must be defined)|`postgresql://servername:5432` or `postgresql://user:pass@hostname:port`|
 |`SECRET_KEY`|Secret key for JWT tokens|`secret123`|
+|`DB_TYPE`|Specify database type (`mongodb` or `postgres`); default is `mongodb`|`mongodb`|
 
 Alternatively, you can create a `.env` file and load it up with the environment variables.
 

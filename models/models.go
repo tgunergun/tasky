@@ -12,9 +12,8 @@ type Todo struct {
 }
 
 type User struct {
-	ID     primitive.ObjectID 	`bson:"_id"`
-	Name   *string             	`json:"username"	bson:"username"`
-	Email  *string             	`json:"email"		bson:"email"`
-	Password *string             `json:"password"	bson:"password"`
+	ID       primitive.ObjectID `bson:"_id"`
+	Name     *string            `json:"username"	bson:"username"`
+	Email    *string            `json:"email"		bson:"email"`
+	Password *string            `json:"password"	bson:"password"`
 }
-
