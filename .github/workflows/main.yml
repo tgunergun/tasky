@@ -24,4 +24,4 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           push: true
-          tags: ${{ vars.DOCKER_USERNAME }}/${{ vars.IMAGE_NAME}}:latest
+          tags: ${{ vars.REGISTRY }}/${{ vars.IMAGE_NAME}}:latest
