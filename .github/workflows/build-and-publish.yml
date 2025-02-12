@@ -15,6 +15,7 @@ on:
 env:
   REGISTRY: demowiz.azurecr.io
   IMAGE_NAME: ${{ github.repository }}
+  ACR_NAME: demowiz
 
 permissions:
   id-token: write
