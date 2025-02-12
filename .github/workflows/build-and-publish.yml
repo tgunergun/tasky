@@ -16,12 +16,14 @@ env:
   REGISTRY: demowiz.azurecr.io
   IMAGE_NAME: ${{ github.repository }}
 
+permissions:
+  id-token: write
+  contents: read
+  pull-requests: write 
+
 jobs:
   build-and-push-image:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
 
     steps:
       - name: Checkout repository
@@ -40,7 +42,7 @@ jobs:
           registry: ${{ env.ACR_NAME }}.azurecr.io
           username: 00000000-0000-0000-0000-000000000000  # Not needed for OIDC but required by action
           password: unused  # Not needed for OIDC but required by action
-          
+
 
       # - name: Extract metadata (tags, labels) for Docker
       #   id: meta
