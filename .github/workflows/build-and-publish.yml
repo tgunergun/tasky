@@ -67,6 +67,9 @@ jobs:
           severity: "CRITICAL,HIGH"
           ignore-unfixed: true  # Only fail for fixable issues
         continue-on-error: true  # Prevents workflow from stopping immediately
+      
+      - name: Print Trivy scan report
+        run: cat trivy-report.txt 
 
       - name: Save Trivy scan report
         uses: actions/upload-artifact@v4
