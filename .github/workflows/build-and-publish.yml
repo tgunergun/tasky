@@ -62,6 +62,7 @@ jobs:
         with:
           image-ref: ${{ env.ACR_NAME }}.azurecr.io/dixondalmeida/tasky:latest
           format: "table"
+          output: trivy-report.txt  # Save output to a file
           exit-code: 1  # Fail workflow if vulnerabilities are found
           severity: "CRITICAL,HIGH"
           ignore-unfixed: true  # Only fail for fixable issues
@@ -72,6 +73,7 @@ jobs:
         with:
           name: trivy-report
           path: trivy-report.txt
+          retention-days: 30
       
       - name: Push Docker image to ACR 
         uses: docker/build-push-action@v5
