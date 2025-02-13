@@ -1,7 +1,90 @@
-# This workflow uses actions that are not certified by GitHub.
-# They are provided by a third-party and are governed by
-# separate terms of service, privacy policy, and support
-# documentation.
+# # This workflow uses actions that are not certified by GitHub.
+# # They are provided by a third-party and are governed by
+# # separate terms of service, privacy policy, and support
+# # documentation.
+
+# name: Build and Publish a Docker image
+
+# on:
+#   pull_request:
+#     branches:
+#       - main
+#   push:
+#     branches: ['main']
+
+# env:
+#   REGISTRY: wizdemoacr00289.azurecr.io
+#   IMAGE_NAME: ${{ github.repository }}
+#   ACR_NAME: wizdemoacr00289
+
+# permissions:
+#   id-token: write
+#   contents: read
+#   pull-requests: write 
+
+# jobs:
+#   build-and-push-image:
+#     runs-on: ubuntu-latest
+
+#     steps:
+#       - name: Checkout repository
+#         uses: actions/checkout@v3
+
+#       - name: Azure login
+#         uses: azure/login@v2
+#         with:
+#           client-id: ${{ secrets.AZURE_CLIENT_ID }}
+#           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+#           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      
+#       - name: Log in to Azure Container Registry (ACR)
+#         run: |
+#           az acr login --name ${{ env.ACR_NAME }}
+      
+#       - name: Extract metadata (tags, labels) for Docker
+#         id: meta
+#         uses: docker/metadata-action@v4
+#         with:
+#           images: ${{ env.ACR_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}
+#           flavor: |
+#             latest=true
+      
+#       - name: Build  Docker image
+#         uses: docker/build-push-action@v5
+#         with:
+#           context: .
+#           push: false
+#           tags: ${{ steps.meta.outputs.tags }}
+#           labels: ${{ steps.meta.outputs.labels }}
+      
+#       - name: Run Trivy vulnerability scan
+#         uses: aquasecurity/trivy-action@master
+#         with:
+#           image-ref: ${{ env.ACR_NAME }}.azurecr.io/dixondalmeida/tasky:latest
+#           format: "table"
+#           output: trivy-report.txt  # Save output to a file
+#           exit-code: 1  # Fail workflow if vulnerabilities are found
+#           severity: "CRITICAL,HIGH"
+#           ignore-unfixed: true  # Only fail for fixable issues
+#         continue-on-error: true  # Prevents workflow from stopping immediately
+      
+#       - name: Print Trivy scan report
+#         run: cat trivy-report.txt 
+
+#       - name: Save Trivy scan report
+#         uses: actions/upload-artifact@v4
+#         with:
+#           name: trivy-report
+#           path: trivy-report.txt
+#           retention-days: 30
+      
+#       - name: Push Docker image to ACR 
+#         uses: docker/build-push-action@v5
+#         with:
+#           context: .
+#           push: true
+#           tags: ${{ steps.meta.outputs.tags }}
+#           labels: ${{ steps.meta.outputs.labels }}
 
 name: Build and Publish a Docker image
 
@@ -13,12 +96,11 @@ on:
     branches: ['main']
 
 env:
-  REGISTRY: wizdemoacr00289.azurecr.io
+  REGISTRY: wizdemoacr0098.azurecr.io
   IMAGE_NAME: ${{ github.repository }}
-  ACR_NAME: wizdemoacr00289
+  ACR_NAME: wizdemoacr0098
 
 permissions:
-  id-token: write
   contents: read
   pull-requests: write 
 
@@ -30,16 +112,18 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Azure login
+      - name: Azure login using Service Principal
         uses: azure/login@v2
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-      
-      - name: Log in to Azure Container Registry (ACR)
+          allow-no-subscriptions: true
+          service-principal-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
+
+      - name: Log in to Azure Container Registry (ACR) using Service Principal
         run: |
-          az acr login --name ${{ env.ACR_NAME }}
+          az acr login --name ${{ env.ACR_NAME }} --username ${{ secrets.AZURE_CLIENT_ID }} --password ${{ secrets.AZURE_CLIENT_SECRET }}
       
       - name: Extract metadata (tags, labels) for Docker
         id: meta
@@ -49,7 +133,7 @@ jobs:
           flavor: |
             latest=true
       
-      - name: Build  Docker image
+      - name: Build Docker image
         uses: docker/build-push-action@v5
         with:
           context: .
@@ -62,11 +146,11 @@ jobs:
         with:
           image-ref: ${{ env.ACR_NAME }}.azurecr.io/dixondalmeida/tasky:latest
           format: "table"
-          output: trivy-report.txt  # Save output to a file
-          exit-code: 1  # Fail workflow if vulnerabilities are found
+          output: trivy-report.txt
+          exit-code: 1
           severity: "CRITICAL,HIGH"
-          ignore-unfixed: true  # Only fail for fixable issues
-        continue-on-error: true  # Prevents workflow from stopping immediately
+          ignore-unfixed: true
+        continue-on-error: true
       
       - name: Print Trivy scan report
         run: cat trivy-report.txt 
@@ -85,3 +169,4 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+
