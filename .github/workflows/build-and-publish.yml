@@ -101,6 +101,7 @@ env:
   ACR_NAME: wizdemoacr0098
 
 permissions:
+  id-token: write
   contents: read
   pull-requests: write 
 
