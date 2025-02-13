@@ -14,5 +14,4 @@ COPY --from=build  /go/src/tasky/tasky .
 COPY --from=build  /go/src/tasky/assets ./assets
 EXPOSE 8080
 ENTRYPOINT ["/app/tasky"]
-
-
+#docker run -d -p 8080:8080 --name tasky-container -e SECRET_KEY=secret123 -e MONGODB_URI=mongodb://admin:admin@172.191.4.41:27017 image_name  

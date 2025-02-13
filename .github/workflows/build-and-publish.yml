@@ -13,9 +13,9 @@ on:
     branches: ['main']
 
 env:
-  REGISTRY: demowiz.azurecr.io
+  REGISTRY: wizdemoacr00289.azurecr.io
   IMAGE_NAME: ${{ github.repository }}
-  ACR_NAME: demowiz
+  ACR_NAME: wizdemoacr00289
 
 permissions:
   id-token: write
