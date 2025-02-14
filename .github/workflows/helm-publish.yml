@@ -31,6 +31,9 @@ jobs:
       
         - name: Set up Helm
           uses: azure/setup-helm@v1
+        
+        - name: Initialize Helm
+          run: helm init --client-only
 
         - name: Package Helm chart
           run: helm package ./helm
