@@ -3,10 +3,12 @@ name: Trigger on folder changes
 on:
   push:
     paths:
-      - 'helm/**'  # Trigger only if files inside 'my-folder/' change
+      - 'helm/**' 
+      - '.github/workflows/helm-publish.yml'
   pull_request:
     paths:
-      - 'helm/**'  # Trigger on PRs that modify 'my-folder/'
+      - 'helm/**'  
+      - '.github/workflows/helm-publish.yml'
 
 env:
   ACR_NAME: wizdemoacr000897

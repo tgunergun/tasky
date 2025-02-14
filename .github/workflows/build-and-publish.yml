@@ -6,10 +6,12 @@ on:
       - main
     paths-ignore:
       - 'helm/**'
+      - '.github/workflows/helm-publish.yml'
   push:
     branches: ['main']
     paths-ignore:
       - 'helm/**'
+      - '.github/workflows/helm-publish.yml'
 
 env:
   REGISTRY: wizdemoacr000897.azurecr.io
