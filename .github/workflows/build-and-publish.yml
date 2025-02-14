@@ -8,9 +8,9 @@ on:
     branches: ['main']
 
 env:
-  REGISTRY: wizdemoacr0098.azurecr.io
+  REGISTRY: wizdemoacr000897.azurecr.io
   IMAGE_NAME: ${{ github.repository }}
-  ACR_NAME: wizdemoacr0098
+  ACR_NAME: wizdemoacr000897
 
 permissions:
   contents: read
