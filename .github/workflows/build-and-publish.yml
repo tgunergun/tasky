@@ -4,8 +4,12 @@ on:
   pull_request:
     branches:
       - main
+    paths-ignore:
+      - 'helm/**'
   push:
     branches: ['main']
+    paths-ignore:
+      - 'helm/**'
 
 env:
   REGISTRY: wizdemoacr000897.azurecr.io
