@@ -1,0 +1,29 @@
+replicaCount: 1
+
+image:
+  repository: wizdemoacr000897.azurecr.io/dixondalmeida/tasky
+  tag: "latest"
+  pullPolicy: IfNotPresent
+
+service:
+  type: LoadBalancer
+  port: 8080
+  # annotations:
+  #   service.beta.kubernetes.io/azure-load-balancer-internal: "true"
+
+ingress:
+  enabled: false
+  annotations: {}
+  hosts:
+    - host: chart-example.local
+      paths: []
+  tls: []
+
+resources: {}
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+env:
+  SECRET_KEY: <secret>
+  MONGODB_URI: mongodb_url

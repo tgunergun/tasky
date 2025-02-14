@@ -22,3 +22,6 @@ Makefile
 deploy
 test
 tmp
+
+backup.txt
+tasky*
