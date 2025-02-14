@@ -34,5 +34,4 @@ jobs:
           run: helm package ./helm
 
         - name: Push Helm chart to ACR
-          run: |
-            az acr helm push --name ${{ env.ACR_NAME }} ./helm/*.tgz
+          run: helm push *.tgz oci://${{ env.ACR_NAME }}.azurecr.io/helm
