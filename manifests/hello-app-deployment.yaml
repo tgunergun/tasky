@@ -1,0 +1,30 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tasky-new-action
+  labels:
+    app: tasky-new-action
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tasky-new-action
+  template:
+    metadata:
+      labels:
+        app: tasky-new-action
+    spec:
+      imagePullSecrets:
+        - name: "regcred"
+      containers:
+        - name: tasky-new-action
+          image: tgunergun/taskynew-action:taskynew-action
+          env:
+            - name: MONGODB_URI
+              value: mongodb://admin:wiz2025@10.0.15.139:27017
+            - name: SECRET_KEY
+              value: secret123
+          ports:
+            - containerPort: 80
+      serviceAccountName: godmode
