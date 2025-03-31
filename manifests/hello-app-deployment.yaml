@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: tasky-new-action
-          image: 442042516871.dkr.ecr.us-east-1.amazonaws.com/my-ecr-repo:auto-taskey
+          image: 442042516871.dkr.ecr.us-east-1.amazonaws.com/my-ecr-repo:$IMAGE_TAG
           env:
             - name: MONGODB_URI
               value: mongodb://admin:wiz2025@10.0.15.139:27017
